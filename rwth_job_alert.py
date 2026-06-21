@@ -35,14 +35,13 @@ KEYWORDS = [
     "automotive", "vehicle", "control", "automation", "python"
 
     "maschinelles lernen", "künstliche intelligenz", "ki",
-    "bildverarbeitung", "robotik", "roboter", "autonomes fahren",
-    "navigation", "lokalisierung", "kartierung", "regelung",
+    "bildverarbeitung", "robotik", "roboter", "autonomes fahren", 
+    "lokalisierung", "kartierung", "regelung",
     "automatisierung", "sensorik", "wahrnehmung",
     "maschinenbau", "mechanik", "mechatronik", "simulation",
     "finite-elemente", "finite elemente", "fem", "struktur",
     "strukturanalyse", "schwingung", "dynamik", "kinematik",
-    "fahrzeugtechnik", "automobil", "automotive", "cad",
-    "ansys", "matlab"
+    "fahrzeugtechnik", "automobil", "automotiv"
 ]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
