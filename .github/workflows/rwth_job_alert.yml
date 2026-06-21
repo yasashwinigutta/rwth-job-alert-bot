@@ -5,60 +5,51 @@ on:
     - cron: "0 * * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 concurrency:
   group: rwth-job-alert
   cancel-in-progress: false
 
 jobs:
+
   check-jobs:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main branch
+
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Restore seen jobs from private branch
+      - name: Restore seen jobs cache
+        uses: actions/cache@v4
+        with:
+          path: seen_jobs.json
+          key: seen-jobs-cache
+
+      - name: Create empty seen file if missing
         run: |
-          git fetch origin bot-state || true
-          if git show origin/bot-state:seen_jobs.json > seen_jobs.json 2>/dev/null; then
-            echo "Restored seen_jobs.json from bot-state branch"
-          else
+          if [ ! -f seen_jobs.json ]; then
             echo "[]" > seen_jobs.json
-            echo "Created new empty seen_jobs.json"
           fi
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
 
       - name: Run bot
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python rwth_job_alert.py
-
-      - name: Save seen jobs to private branch
         run: |
-          mkdir -p /tmp/bot-state
-          cp seen_jobs.json /tmp/bot-state/seen_jobs.json
-          cd /tmp/bot-state
+          python rwth_job_alert.py
 
-          git init
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          git checkout -b bot-state
-          cp /tmp/bot-state/seen_jobs.json .
-
-          git add seen_jobs.json
-          git commit -m "Update seen jobs state" || echo "No state changes"
-
-          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
-          git push --force origin bot-state
+      - name: Save seen jobs cache
+        uses: actions/cache/save@v4
+        with:
+          path: seen_jobs.json
+          key: seen-jobs-cache
