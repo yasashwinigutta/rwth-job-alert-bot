@@ -106,17 +106,6 @@ https://www.rwth-aachen.de/...
 
 ## Future Improvements
 
-* Add support for:
-
-  * Fraunhofer Institutes Aachen
-  * DLR
-  * WZL
-  * IKV
-  * IMA/ZLW
-  * FIA
-  * Bosch Aachen
-  * FEV
-  * Ford Aachen
 * Add fuzzy keyword matching.
 * Add daily summary mode.
 * Add support for multiple job portals.
