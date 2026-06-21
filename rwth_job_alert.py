@@ -24,7 +24,7 @@ KEYWORDS = [
     "machine learning", "ml", "artificial intelligence", "ai",
     "deep learning", "reinforcement learning", "neural network",
     "computer vision", "image processing", "perception",
-    "robot", "robots", "robotics", "ros", "autonomous",
+    "robot", "robots", "robotics", "ros", "ros2", "autonomous",
     "autonomous driving", "navigation", "localization", "mapping",
     "slam", "path planning", "motion planning",
     "python", "programming", "software", "algorithm", "data science",
@@ -32,7 +32,7 @@ KEYWORDS = [
     "mechanical", "mechatronics", "cad", "fem", "fea",
     "finite element", "finite element method", "ansys",
     "structural", "vibration", "dynamics", "kinematics",
-    "automotive", "vehicle", "control", "automation",
+    "automotive", "vehicle", "control", "automation", "python"
 
     "maschinelles lernen", "künstliche intelligenz", "ki",
     "bildverarbeitung", "robotik", "roboter", "autonomes fahren",
