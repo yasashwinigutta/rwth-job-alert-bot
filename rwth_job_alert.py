@@ -80,19 +80,19 @@ def send_telegram(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
     for chat_id in CHAT_IDS:
-	chat_id = chat_id.strip()
+        chat_id = chat_id.strip()
 
-	if not chat_id:
-		continue
+        if not chat_id:
+            continue
 
-	r = requests.post(url, data={
-        	"chat_id": CHAT_ID,
-        	"text": message,
-        	"parse_mode": "HTML",
-        	"disable_web_page_preview": False
-	}, timeout=20)
+        r = requests.post(url, data={
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": False
+        }, timeout=20)
 
-	r.raise_for_status()
+        r.raise_for_status()
 
 
 def keyword_matches(text):
