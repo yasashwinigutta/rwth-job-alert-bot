@@ -8,7 +8,7 @@ from datetime import datetime
 from urllib.parse import urljoin
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+CHAT_IDS = os.getenv("TELEGRAM_CHAT_IDS", "").split(",")
 
 RWTH_URL = "https://www.rwth-aachen.de/go/id/buym/lidx/1"
 SEEN_FILE = "seen_jobs.json"
@@ -74,17 +74,25 @@ def fetch_url(url):
 
 
 def send_telegram(message):
-    if not BOT_TOKEN or not CHAT_ID:
-        raise ValueError("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID")
+    if not BOT_TOKEN or not CHAT_IDS:
+        raise ValueError("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_IDS")
 
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    r = requests.post(url, data={
-        "chat_id": CHAT_ID,
-        "text": message,
-        "parse_mode": "HTML",
-        "disable_web_page_preview": False
-    }, timeout=20)
-    r.raise_for_status()
+
+    for chat_id in CHAT_IDS:
+	chat_id = chat_id.strip()
+
+	if not chat_id:
+		continue
+
+	r = requests.post(url, data={
+        	"chat_id": CHAT_ID,
+        	"text": message,
+        	"parse_mode": "HTML",
+        	"disable_web_page_preview": False
+	}, timeout=20)
+
+	r.raise_for_status()
 
 
 def keyword_matches(text):
