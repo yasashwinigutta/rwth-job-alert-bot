@@ -5,6 +5,9 @@ on:
     - cron: "0 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: rwth-job-alert
   cancel-in-progress: false
@@ -17,18 +20,15 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v4
 
-      - name: Restore seen jobs cache
-        uses: actions/cache/restore@v4
-        with:
-          path: seen_jobs.json
-          key: seen-jobs-${{ github.run_id }}
-          restore-keys: |
-            seen-jobs-
-
-      - name: Create empty seen file if missing
+      - name: Restore seen jobs from bot-state branch
         run: |
-          if [ ! -f seen_jobs.json ]; then
+          git fetch origin bot-state || true
+
+          if git show origin/bot-state:seen_jobs.json > seen_jobs.json 2>/dev/null; then
+            echo "Restored seen_jobs.json from bot-state branch"
+          else
             echo "[]" > seen_jobs.json
+            echo "No previous state found. Created empty seen_jobs.json"
           fi
 
       - name: Set up Python
@@ -45,8 +45,21 @@ jobs:
           TELEGRAM_CHAT_IDS: ${{ secrets.TELEGRAM_CHAT_IDS }}
         run: python rwth_job_alert.py
 
-      - name: Save seen jobs cache
-        uses: actions/cache/save@v4
-        with:
-          path: seen_jobs.json
-          key: seen-jobs-${{ github.run_id }}
+      - name: Save seen jobs to bot-state branch
+        run: |
+          mkdir -p /tmp/bot-state
+          cp seen_jobs.json /tmp/bot-state/seen_jobs.json
+
+          cd /tmp/bot-state
+
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git checkout -b bot-state
+
+          git add seen_jobs.json
+          git commit -m "Update seen jobs state" || echo "No state changes"
+
+          git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git push --force origin bot-state
