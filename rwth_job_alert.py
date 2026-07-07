@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_IDS = os.getenv("TELEGRAM_CHAT_IDS", "").split(",")
 
-RWTH_URL = "https://www.rwth-aachen.de/go/id/buym/lidx/1"
+RWTH_URL = "https://www.rwth-aachen.de/cms/root/die-rwth/Arbeiten-an-der-RWTH/~buym/RWTH-Jobportal/?search=&aaaaaaaaaaaaanr=Studentische+Hilfskraft&frist=&aaaaaaaaaaaaanq=&aaaaaaaaaaaaany=&aaaaaaaaaaaaanw=&aaaaaaaaaaaaanv=&aaaaaaaaaaaaanx=&aaaaaaaaaaaabny="
 SEEN_FILE = "seen_jobs.json"
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
