@@ -181,7 +181,7 @@ def main():
             detail_soup = BeautifulSoup(detail_html, "html.parser")
             detail_text = detail_soup.get_text("\n", strip=True)
 
-        full_text = job["context"] + "\n" + detail_text
+        full_text = detail_text
 
         if not is_student_job(full_text):
             continue
