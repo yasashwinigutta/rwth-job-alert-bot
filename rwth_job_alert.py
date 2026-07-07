@@ -29,7 +29,7 @@ KEYWORDS = [
     "robot", "robots", "robotics", "ros", "autonomous",
     "autonomous driving", "navigation", "localization", "mapping",
     "slam", "path planning", "motion planning",
-    "python", "programming", "software", "algorithm", "data science",
+    "python", "programming", "algorithm", "data science",
     "data analysis", "simulation", "matlab", "simulink",
     "mechanical", "mechatronics", "cad", "fem", "fea",
     "finite element", "finite element method", "ansys",
