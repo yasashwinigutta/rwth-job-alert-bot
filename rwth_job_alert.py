@@ -62,6 +62,7 @@ def fetch(url):
 def load_seen():
     if not os.path.exists(SEEN_FILE):
         return set()
+
     try:
         with open(SEEN_FILE, "r") as f:
             return set(json.load(f))
@@ -78,7 +79,7 @@ def send_telegram(message):
     if not BOT_TOKEN or not CHAT_IDS:
         raise ValueError("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_IDS")
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
     for chat_id in CHAT_IDS:
         chat_id = chat_id.strip()
@@ -86,7 +87,7 @@ def send_telegram(message):
             continue
 
         r = requests.post(
-            url,
+            telegram_url,
             data={
                 "chat_id": chat_id,
                 "text": message,
@@ -101,9 +102,11 @@ def send_telegram(message):
 def keyword_matches(text):
     text = text.lower()
     found = []
+
     for kw in KEYWORDS:
         if re.search(r"\b" + re.escape(kw.lower()) + r"\b", text):
             found.append(kw)
+
     return sorted(set(found))
 
 
@@ -112,15 +115,37 @@ def is_student_job(text):
     return any(term in text for term in STUDENT_TERMS)
 
 
-def extract_title(text, job_code):
+def extract_title_from_soup(soup, job_code):
+    h1 = soup.find("h1")
+    if h1:
+        title = h1.get_text(" ", strip=True)
+        if title and "rwth jobs portal" not in title.lower():
+            return title[:180]
+
+    h2 = soup.find("h2")
+    if h2:
+        title = h2.get_text(" ", strip=True)
+        if title and "rwth jobs portal" not in title.lower():
+            return title[:180]
+
+    title_tag = soup.find("title")
+    if title_tag:
+        title = title_tag.get_text(" ", strip=True)
+        title = title.replace(" - RWTH AACHEN UNIVERSITY", "")
+        title = title.replace("RWTH AACHEN UNIVERSITY", "")
+        title = title.strip(" -|")
+        if title and "rwth jobs portal" not in title.lower():
+            return title[:180]
+
+    text = soup.get_text("\n", strip=True)
     lines = [line.strip() for line in text.splitlines() if line.strip()]
 
     for line in lines:
-        if job_code in line and not line.lower().startswith("rwth jobs portal"):
+        if job_code in line and "rwth jobs portal" not in line.lower():
             return line[:180]
 
     for line in lines:
-        if is_student_job(line):
+        if is_student_job(line) and "rwth jobs portal" not in line.lower():
             return line[:180]
 
     return "RWTH Student Assistant Job"
@@ -146,7 +171,6 @@ def get_candidate_jobs():
         if not is_student_job(context_text):
             continue
 
-        # Build the real direct RWTH job link from the job code
         direct_job_url = f"https://www.rwth-aachen.de/go/id/kbag/file/{job_code}/"
 
         candidates[job_code] = {
@@ -156,6 +180,7 @@ def get_candidate_jobs():
         }
 
     return list(candidates.values())
+
 
 def main():
     print("Checking URL:", RWTH_URL)
@@ -175,35 +200,34 @@ def main():
             continue
 
         detail_html = fetch(url)
-        detail_text = ""
 
-        if detail_html:
-            detail_soup = BeautifulSoup(detail_html, "html.parser")
-            detail_text = detail_soup.get_text("\n", strip=True)
-
-        full_text = detail_text
-
-        if not is_student_job(full_text):
+        if not detail_html:
             continue
 
-        matches = keyword_matches(full_text)
+        detail_soup = BeautifulSoup(detail_html, "html.parser")
+        detail_text = detail_soup.get_text("\n", strip=True)
+
+        if not is_student_job(detail_text):
+            continue
+
+        matches = keyword_matches(detail_text)
 
         if not matches:
             continue
 
-        title = extract_title(full_text, job_code)
+        title = extract_title_from_soup(detail_soup, job_code)
 
         message = f"""🚨 <b>New RWTH Student Assistant Job Match</b>
 
-<b>{title}</b>
+📌 <b>{title}</b>
 
-Job code:
+🆔 Job code:
 <b>{job_code}</b>
 
-Matched keywords:
+🎯 Matched keywords:
 {", ".join(matches[:20])}
 
-Direct job link:
+🔗 Direct job link:
 {url}
 """
 
