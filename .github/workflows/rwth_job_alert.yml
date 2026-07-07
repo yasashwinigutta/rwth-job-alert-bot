@@ -10,21 +10,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-
   check-jobs:
-
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout repo
+      - name: Checkout main branch
         uses: actions/checkout@v4
 
       - name: Restore seen jobs cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: seen_jobs.json
-          key: seen-jobs-cache
+          key: seen-jobs-${{ github.run_id }}
+          restore-keys: |
+            seen-jobs-
 
       - name: Create empty seen file if missing
         run: |
@@ -32,24 +31,22 @@ jobs:
             echo "[]" > seen_jobs.json
           fi
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run bot
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_IDS: ${{ secrets.TELEGRAM_CHAT_IDS }}
-        run: |
-          python rwth_job_alert.py
+        run: python rwth_job_alert.py
 
       - name: Save seen jobs cache
         uses: actions/cache/save@v4
         with:
           path: seen_jobs.json
-          key: seen-jobs-cache
+          key: seen-jobs-${{ github.run_id }}
