@@ -3,7 +3,6 @@ import os
 import re
 import time
 from datetime import datetime
-from urllib.parse import urljoin, urldefrag
 
 import requests
 from bs4 import BeautifulSoup
@@ -99,10 +98,6 @@ def send_telegram(message):
         r.raise_for_status()
 
 
-def clean_url(url):
-    return urldefrag(url)[0]
-
-
 def keyword_matches(text):
     text = text.lower()
     found = []
@@ -151,30 +146,16 @@ def get_candidate_jobs():
         if not is_student_job(context_text):
             continue
 
-        link = None
-        for a in container.find_all("a", href=True):
-            href = clean_url(urljoin(RWTH_URL, a["href"]))
-
-            if href == clean_url(RWTH_URL):
-                continue
-
-            if "rwth-aachen.de" not in href:
-                continue
-
-            link = href
-            break
-
-        if not link:
-            continue
+        # Build the real direct RWTH job link from the job code
+        direct_job_url = f"https://www.rwth-aachen.de/go/id/kbag/file/{job_code}/"
 
         candidates[job_code] = {
             "job_code": job_code,
-            "url": link,
+            "url": direct_job_url,
             "context": context_text,
         }
 
     return list(candidates.values())
-
 
 def main():
     print("Checking URL:", RWTH_URL)
